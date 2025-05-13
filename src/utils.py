@@ -1,5 +1,4 @@
 from pathlib import Path
-import pickle
 import numpy as np
 import gurobipy as gp
 
@@ -51,7 +50,7 @@ def generate_pnnl_output_dirs_filename(timeseries, parameter, do_efficiency, do_
     # DIRECTORY
     root = Path(__file__).resolve().parents[1]
     dir_1 = "historical" if timeseries.is_historical else "forecasted"
-    dir_2 = parameter.pnnl_technology
+    dir_2 = parameter.pnnl_technology # for no efficiency and rest case, net_arbitrage_revenue is the same for all configs
 
     out_dir = root / "data" / "outputs" / dir_1 / dir_2
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -76,14 +75,17 @@ def generate_pnnl_output_dirs_filename(timeseries, parameter, do_efficiency, do_
     return out_dir, filename # i literally cant do clean bc theres too many args code below is just enough for the project    
 
 
-def save_single(solver):
-    if solver.parameter.parameter_pnnl:
-        out_dir, filename = generate_pnnl_output_dirs_filename(solver.timeseries, solver.parameter, solver.do_efficiency, solver.do_rest)
-        with open(out_dir / f"S{solver.idx_config:02d}_{filename}.pickle", "wb") as f:
-            pickle.dump(solver, f)
-
-
-def save_multiple(timeseries, parameter, args, output: np.ndarray):
+def save_output(timeseries, parameter, args, output: np.ndarray, do_single: bool):
     if parameter.parameter_pnnl:
         out_dir, filename = generate_pnnl_output_dirs_filename(timeseries, parameter, args.do_efficiency, args.do_rest)
-        np.save(out_dir / f"M{parameter.config_count:02d}_{filename}.npy", output)
+        if do_single:
+            np.save(out_dir / f"S{args.idx_config:02d}_{filename}.npy", output)
+        else:
+            np.save(out_dir / f"M{parameter.config_count:02d}_{filename}.npy", output)
+
+
+def disect_single_output(output: np.ndarray):
+    first_column, variables = np.split(output, [1], axis=1)
+    capacity, power, net_arbitrage_revenue, capex, opex = np.array(np.split(first_column.reshape(-1), 5)).reshape(-1).tolist()
+    soc, charge, discharge, switch_charge, switch_discharge = np.split(variables, 5)
+    return capacity, power, net_arbitrage_revenue, capex, opex, soc, charge, discharge, switch_charge, switch_discharge

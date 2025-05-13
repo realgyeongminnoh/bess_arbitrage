@@ -1,11 +1,10 @@
 import os
-import pickle
 import argparse
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 
 from src import *
-from src.utils import *
+from src.utils import suppress_gurobi_parallel_spam, save_output
 
 
 def parse_args():
@@ -114,16 +113,29 @@ def main():
         parameter.rests_after_discharge = np.zeros(parameter.config_count, dtype=int)
 
     if do_single:
-        solver = job(args.idx_config)
+        net_arbitrage_revenue, variables = job(args.idx_config)
 
-        save_single(solver)
+        # result saving
+        output = np.hstack((
+            np.array([
+                parameter.capacities[args.idx_config],
+                parameter.powers[args.idx_config],
+                net_arbitrage_revenue,
+                parameter.capexes[args.idx_config],
+                parameter.opexes[args.idx_config],
+            ])[:, None], 
+            variables
+        )) # (5, time_count + 1) # first column are params & ObjVal # s c d uc ud # soc final value removed
+
+        save_output(timeseries, parameter, args, output, True) # disect_single_output(output) later
 
     else:
         with ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
             net_arbitrage_revenues = list(executor.map(job, range(parameter.config_count)))
 
+        # result saving
         output = np.column_stack([
-            np.arange(parameter.idx_config),
+            np.arange(parameter.config_count),
             parameter.capacities,
             parameter.powers,
             np.array(net_arbitrage_revenues),
@@ -134,7 +146,7 @@ def main():
             parameter.rests_after_discharge
         ])
 
-        save_multiple(timeseries, parameter, args, output)
+        save_output(timeseries, parameter, args, output, False)
 
 
 if __name__ == "__main__":

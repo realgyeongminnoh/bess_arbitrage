@@ -1,3 +1,4 @@
+import numpy as np
 import gurobipy as gp
 
 from src.utils import string_for_non_optimality
@@ -92,8 +93,7 @@ class Solver:
         # result
         if model.Status == gp.GRB.OPTIMAL:
             if self.do_single:
-                self.model = model.ObjVal # TBD cus GUROBIPY model not pickalbe 
-                return self
+                return model.ObjVal, np.delete(model.getAttr("X"), time_count).reshape(5, time_count)
             return model.ObjVal # net_arbitrage_revenue
         else:
             raise ValueError(string_for_non_optimality(self))
