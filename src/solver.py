@@ -57,15 +57,16 @@ class Solver:
             discharge[t] <= power * switch_discharge[t]
             for t in range(time_count)
         )
-        model.addConstr(    # SoC initial value
-            soc[0] == 0
+        model.addConstrs(    # SoC initial and final value
+            soc[t] == 0
+            for t in (0, time_count)
         )
         model.addConstrs(   # SoC dynamics
             soc[t+1] == soc[t] + charge[t] * efficiency - discharge[t] / efficiency
             for t in range(time_count)
         )
         model.addConstrs(   # no simultaneous charging and discharging
-            switch_charge[t] * switch_discharge[t] == 0
+            switch_charge[t] + switch_discharge[t] <= 1
             for t in range(time_count)
         )
         if self.do_rest:
