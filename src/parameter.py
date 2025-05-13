@@ -9,16 +9,16 @@ class Parameter:
             self, 
             timeseries: Timeseries,
             parameter_pnnl: bool,
-            pnnl_year: int, 
             pnnl_technology: str, 
+            pnnl_year: int, 
             pnnl_estimate: str, 
             pnnl_fxrate: float,
     ):
         
         self.timeseries = timeseries
         self.parameter_pnnl = parameter_pnnl
-        self.pnnl_year = pnnl_year
         self.pnnl_technology = pnnl_technology
+        self.pnnl_year = pnnl_year
         self.pnnl_estimate = pnnl_estimate
         self.pnnl_fxrate = pnnl_fxrate
 
@@ -32,24 +32,24 @@ class Parameter:
         self.opexes: np.ndarray = None
 
         if parameter_pnnl:
-            self.get_pnnl(pnnl_year, pnnl_technology, pnnl_estimate, pnnl_fxrate)
+            self.get_pnnl(pnnl_technology, pnnl_year, pnnl_estimate, pnnl_fxrate)
         else:
             pass # TBD # CUSTOM
 
 
-    def get_pnnl(self, pnnl_year: int, pnnl_technology: str, pnnl_estimate: str, pnnl_fxrate: float):
-        bess_df = self._load_filtered_bess_df(pnnl_year, pnnl_technology, pnnl_estimate)
+    def get_pnnl(self, pnnl_technology: str, pnnl_year: int, pnnl_estimate: str, pnnl_fxrate: float):
+        bess_df = self._load_filtered_bess_df(pnnl_technology, pnnl_year, pnnl_estimate)
         self._get_parameter_arrays(bess_df)
         self._time_currency_adjustment(pnnl_fxrate)
 
 
-    def _load_filtered_bess_df(self, year: int, tech: str, estimate: str) -> pd.DataFrame:
+    def _load_filtered_bess_df(self, tech: str, year: int, estimate: str) -> pd.DataFrame:
         bess_df = pd.read_excel(self.timeseries._dir_data_inputs / "ESGC_Cost_Performance_Database_v2024.xlsx", sheet_name="Database")
 
         # layer-1 filtering
         bess_df = bess_df[
-            (bess_df["Year"] == year) & 
             (bess_df["Technology"] == tech.replace("_", " ").strip()) & 
+            (bess_df["Year"] == year) & 
             (bess_df["Estimate_type"] == estimate)
         ]
 

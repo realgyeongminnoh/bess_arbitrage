@@ -1,4 +1,5 @@
 from pathlib import Path
+import pickle
 import numpy as np
 import gurobipy as gp
 
@@ -22,15 +23,15 @@ Timeseries
   time_end       : {_to_yyyymmddhh(solver.timeseries.time_end)}
 Parameter
   parameter_pnnl : {solver.parameter.parameter_pnnl}
-  pnnl_year      : {solver.parameter.pnnl_year}
   pnnl_technology: {solver.parameter.pnnl_technology}
+  pnnl_year      : {solver.parameter.pnnl_year}
   pnnl_estimate  : {solver.parameter.pnnl_estimate}
   pnnl_fxrate    : {solver.parameter.pnnl_fxrate}
 Solver
+  do_single      : {solver.do_single}
   idx_config     : {solver.idx_config}
   do_efficiency  : {solver.do_efficiency}
   do_rest        : {solver.do_rest}
-  return_model   : {solver.return_model}
 """
 
 
@@ -46,19 +47,43 @@ def print_bess_config(parameter):
     )))
 
 
-def save_output(timeseries, pnnl_Technology: str, solver_model: int, output: np.ndarray):
+def generate_pnnl_output_dirs_filename(timeseries, parameter, do_efficiency, do_rest):
+    # DIRECTORY
     root = Path(__file__).resolve().parents[1]
-    folder = "historical" if timeseries.is_historical else "forecasted"
+    dir_1 = "historical" if timeseries.is_historical else "forecasted"
+    dir_2 = parameter.pnnl_technology
 
-    out_dir = root / "data" / "outputs" / folder
+    out_dir = root / "data" / "outputs" / dir_1 / dir_2
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    mode = "minute" if timeseries.is_minute else "hour"
-
+    # FOLRDER NAME
     def _to_yyyymmddhh(dt64):
         dt = str(dt64)[:13].replace("-", "").replace("T", "")
         return dt
 
-    filename = f"{pnnl_Technology}_{mode}_model_{solver_model}_{_to_yyyymmddhh(timeseries.time_start)}_{_to_yyyymmddhh(timeseries.time_end)}.npy"
+    pnnl_year = {2023: "P", 2030: "F"}[parameter.pnnl_year]
+    estimate_capitalletter = {"High": "H", "Point": "P", "Low": "L"}[parameter.pnnl_estimate]
+    fxrate = parameter.pnnl_fxrate
 
-    np.save(out_dir / filename, output)
+    efficiency = "D" if do_efficiency else "N"
+    rest = "D" if do_rest else "N"
+
+    time_granurality = "M" if timeseries.is_minute else "H"
+    time_start = _to_yyyymmddhh(timeseries.time_start)
+    time_end = _to_yyyymmddhh(timeseries.time_end)
+    
+    filename = f"{pnnl_year}{estimate_capitalletter}{fxrate}_{efficiency}{rest}_{time_granurality}_{time_start}_{time_end}"
+    return out_dir, filename # i literally cant do clean bc theres too many args code below is just enough for the project    
+
+
+def save_single(solver):
+    if solver.parameter.parameter_pnnl:
+        out_dir, filename = generate_pnnl_output_dirs_filename(solver.timeseries, solver.parameter, solver.do_efficiency, solver.do_rest)
+        with open(out_dir / f"S{solver.idx_config:02d}_{filename}.pickle", "wb") as f:
+            pickle.dump(solver, f)
+
+
+def save_multiple(timeseries, parameter, args, output: np.ndarray):
+    if parameter.parameter_pnnl:
+        out_dir, filename = generate_pnnl_output_dirs_filename(timeseries, parameter, args.do_efficiency, args.do_rest)
+        np.save(out_dir / f"M{parameter.config_count:02d}_{filename}.npy", output)

@@ -10,21 +10,18 @@ class Solver:
             self, 
             timeseries: Timeseries, 
             parameter: Parameter, 
-            idx_config: int, 
-            do_efficiency: bool = True,
-            do_rest: bool = True,
-            return_model: bool = False,
+            do_single: bool,
+            idx_config: int,
+            do_efficiency: bool,
+            do_rest: bool,
     ):
 
         self.timeseries = timeseries
         self.parameter = parameter
+        self.do_single = do_single
         self.idx_config = idx_config
         self.do_efficiency = do_efficiency
         self.do_rest = do_rest
-        self.return_model = return_model
-
-        if not self.do_efficiency:
-            self.parameter.efficiencies[self.idx_config] = 1
 
 
     def solve(self):
@@ -94,15 +91,15 @@ class Solver:
 
         # result
         if model.Status == gp.GRB.OPTIMAL:
-            if self.return_model:
-                return model
+            if self.do_single:
+                self.model = model.ObjVal # TBD cus GUROBIPY model not pickalbe 
+                return self
             return model.ObjVal # net_arbitrage_revenue
         else:
             raise ValueError(string_for_non_optimality(self))
 
 
     def money(self):
+        # not yet probably can't be used in main.py at all need separate main like file for analysis and rename "main"
         capex = self.parameter.capexes[self.idx_config]
         opex = self.parameter.opexes[self.idx_config]
-    
- 

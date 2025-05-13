@@ -15,13 +15,12 @@ class Timeseries:
         self.is_minute = is_minute
         self.is_historical = is_historical
         self.end_exclude = end_exclude
+        self.time_start: np.datetime64 = self.get_datetime64(time_start)
+        self.time_end: np.datetime64 = self.get_datetime64(time_end, exclude=end_exclude)
 
         self._file_smp = "smp_historical.npy" if self.is_historical else "smp_forecasted.npy"
         self._file_timestamp = "timestamp_historical.npy" if self.is_historical else "timestamp_forecasted.npy"
         self._dir_data_inputs = Path(__file__).resolve().parents[1] / "data" / "inputs"
-
-        self.time_start: np.datetime64 = self.get_datetime64(time_start)
-        self.time_end: np.datetime64 = self.get_datetime64(time_end, exclude=end_exclude)
         
         self.timestamp = np.load(self._dir_data_inputs / self._file_timestamp)
         self.smp = np.load(self._dir_data_inputs / self._file_smp)
