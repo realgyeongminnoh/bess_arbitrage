@@ -6,13 +6,13 @@ from src.timeseries import Timeseries
 
 class Parameter:
     def __init__(
-            self, 
-            timeseries: Timeseries,
-            parameter_pnnl: bool,
-            pnnl_technology: str, 
-            pnnl_year: int, 
-            pnnl_estimate: str, 
-            pnnl_fxrate: float,
+        self, 
+        timeseries: Timeseries,
+        parameter_pnnl: bool,
+        pnnl_technology: str, 
+        pnnl_year: int, 
+        pnnl_estimate: str, 
+        pnnl_fxrate: float,
     ):
         
         self.timeseries = timeseries

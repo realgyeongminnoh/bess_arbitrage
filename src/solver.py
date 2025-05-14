@@ -8,13 +8,13 @@ from src.parameter import Parameter
 
 class Solver:
     def __init__(
-            self, 
-            timeseries: Timeseries, 
-            parameter: Parameter, 
-            do_single: bool,
-            idx_config: int,
-            do_efficiency: bool,
-            do_rest: bool,
+        self, 
+        timeseries: Timeseries, 
+        parameter: Parameter, 
+        do_single: bool,
+        idx_config: int,
+        do_efficiency: bool,
+        do_rest: bool,
     ):
 
         self.timeseries = timeseries
@@ -92,7 +92,7 @@ class Solver:
 
         # result
         if model.Status == gp.GRB.OPTIMAL:
-            if self.do_single:
+            if self.do_single:  # np.delete at idx = time_count removes the soc[time_count]; final SoC -> len = time_count
                 return model.ObjVal, np.delete(model.getAttr("X"), time_count).reshape(5, time_count)
             return model.ObjVal # net_arbitrage_revenue
         else:

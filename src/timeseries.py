@@ -4,12 +4,12 @@ import numpy as np
 
 class Timeseries:
     def __init__(
-            self, 
-            is_minute: bool, 
-            is_historical: bool, 
-            end_exclude: bool, 
-            time_start: int, 
-            time_end: int
+        self, 
+        is_minute: bool, 
+        is_historical: bool, 
+        end_exclude: bool, 
+        time_start: int, 
+        time_end: int
     ):
 
         self.is_minute = is_minute

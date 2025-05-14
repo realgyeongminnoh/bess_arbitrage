@@ -85,7 +85,7 @@ def save_output(timeseries, parameter, args, output: np.ndarray, do_single: bool
 
 
 def disect_single_output(output: np.ndarray):
-    first_column, variables = np.split(output, [1], axis=1)
+    first_column, variables = np.split(output, [1], axis=1) # np.split wrapping every sub element in an array... reshape is necessary
     capacity, power, net_arbitrage_revenue, capex, opex = np.array(np.split(first_column.reshape(-1), 5)).reshape(-1).tolist()
-    soc, charge, discharge, switch_charge, switch_discharge = np.split(variables, 5)
+    soc, charge, discharge, switch_charge, switch_discharge = [variable.reshape(-1) for variable in np.split(variables, 5)] 
     return capacity, power, net_arbitrage_revenue, capex, opex, soc, charge, discharge, switch_charge, switch_discharge
