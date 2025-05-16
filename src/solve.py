@@ -98,4 +98,19 @@ def solve(
         if return_details:
             return model
         return model.ObjVal
-    raise ValueError("non-optimal solution")
+    raise ValueError(
+        "non-optimal solution\n"
+        f"time_horizon_length: {time_horizon_length}\n"
+        f"power_output_rated: {power_output_rated}\n"
+        f"energy_capacity_rated: {energy_capacity_rated}\n"
+        f"state_of_health: {state_of_health}\n"
+        f"state_of_charge_initial: {state_of_charge_initial}\n"
+        f"state_of_charge_minimum: {state_of_charge_minimum}\n"
+        f"state_of_charge_maximum: {state_of_charge_maximum}\n"
+        f"self_discharge_rate: {self_discharge_rate}\n"
+        f"efficiency_charge: {efficiency_charge}\n"
+        f"efficiency_discharge: {efficiency_discharge}\n"
+        f"rest_before_charge: {rest_before_charge}\n"
+        f"rest_after_discharge: {rest_after_discharge}\n"
+        f"return_details: {return_details}\n"
+    )
