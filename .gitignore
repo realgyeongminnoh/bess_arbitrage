@@ -1,8 +1,3 @@
-0preliminary/
-**/__pycache__/
-**/fun.ipynb
-main.ipynb
-main_interactive_test.ipynb
-test.ipynb
-test_copy.ipynb
-test_geuna.ipynb
+00_recycle_bin
+01_preliminary
+**/__pycache__
