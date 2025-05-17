@@ -7,20 +7,20 @@ from src.timeseries import get_datetime64
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="im not getting paid for this so please just full year(s) hourly SMP")
+    parser = argparse.ArgumentParser(description="run this before anything")
     parser.add_argument("--is_historical", "--ih", action="store_true", help="historical -> --ih")
-    parser.add_argument("--full_year_start", "--hds", type=int, required=True, help="yyyy; ex) 2015.01.01 -> \"--hds 2015\"")
-    parser.add_argument("--full_year_end", "--hde", type=int, required=True, help="yyyy; ex) 2024.12.31 -> \"--hde 2025\"")
+    parser.add_argument("--full_month_start", "--fms", type=int, required=True, help="yyyymm; ex) 2015.01.01 -> \"--fms 201501\"")
+    parser.add_argument("--full_month_end", "--fme", type=int, required=True, help="yyyymm; ex) 2024.12.31 -> \"--fme 202501\"")
     return parser.parse_args()
 
 
 def validate_args(args):
-    if not (2000 <= args.full_year_start):
-        raise ValueError(f"2000 <= {args.full_year_start} = full_year_start")
-    if not (args.full_year_end < 3000):
-        raise ValueError(f"full_year_end = {args.full_year_end} < 3000")
-    if not (args.full_year_start < args.full_year_end):
-        raise ValueError(f"full_year_start = {args.full_year_start} < {args.full_year_end} = full_year_end")
+    if not (200001 <= args.full_month_start):
+        raise ValueError(f"200001 <= {args.full_month_start} = full_month_start")
+    if not (args.full_month_end <= 300001):
+        raise ValueError(f"full_month_end = {args.full_month_end} < 300001")
+    if not (args.full_month_start < args.full_month_end):
+        raise ValueError(f"full_month_start = {args.full_month_start} < {args.full_month_end} = full_month_end")
 
 
 def save_timestamps(full_date_start, full_date_end, historical_or_forecasted):
@@ -45,7 +45,7 @@ def save_timestamps(full_date_start, full_date_end, historical_or_forecasted):
     print("timestamps initialized for the given system marginal prices")
 
 
-def create_csvs(full_year_start, full_year_end, historical_or_forecasted):
+def create_csvs(full_month_start, full_month_end, historical_or_forecasted):
     dir_outputs = Path(__file__).resolve().parents[0] / "data" / "outputs" / historical_or_forecasted
 
     # MONTHLY
@@ -67,24 +67,19 @@ def create_csvs(full_year_start, full_year_end, historical_or_forecasted):
     dir_csvs = dir_outputs / "net_arbitrage_revenues"
     dir_csvs.mkdir(parents=True, exist_ok=True)
 
-    pairs_month = [
-        (
-            (y * 10000 + m * 100 + 1),
-            ((y + (m == 12)) * 10000 + ((m % 12) + 1) * 100 + 1),
-        )
-        for y in range(full_year_start, full_year_end)
-        for m in range(1, 13)
-    ]
+    count_init, count_exist = 0, 0
+    for start_month in [month for month in range(full_month_start, full_month_end) if 1 <= month % 100 <= 12]:
+        path_csv = dir_csvs / f"{start_month}.csv"
 
-    for pair_month in pairs_month:
-        path_csv = dir_csvs / f"{pair_month[0]}_{pair_month[1]}.csv"
-        
         if not path_csv.exists():
             with path_csv.open("w", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerow(header)
+            count_init += 1
+        else:
+            count_exist += 1
 
-    print(f"{len(pairs_month)} csvs initialized (or already exist) for each month in {full_year_start} ~ {full_year_end - 1}")
+    print(f"{count_init} csvs wereinitialized, {count_exist} csvs existed for each month in {full_month_start} ~ {start_month}")
     
     # MISCELLANEOUS
     header_miscellaneous = header + [
@@ -113,11 +108,11 @@ def main():
     validate_args(args)
 
     historical_or_forecasted = "historical" if args.is_historical else "forecasted"
-    full_date_start = get_datetime64(args.full_year_start * 10000 + 101, False)
-    full_date_end = get_datetime64(args.full_year_end * 10000 + 101, True)
+    full_date_start = get_datetime64(args.full_month_start * 100 + 1, False)
+    full_date_end = get_datetime64(args.full_month_end * 100 + 1, True)
 
     save_timestamps(full_date_start, full_date_end, historical_or_forecasted)
-    create_csvs(args.full_year_start, args.full_year_end, historical_or_forecasted)
+    create_csvs(args.full_month_start, args.full_month_end, historical_or_forecasted)
 
 
 if __name__=="__main__":
