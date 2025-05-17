@@ -10,10 +10,10 @@ def get_datetime64(yyyymmdd: int, exclude: bool):
 
 
 def get_smp(time_start: np.datetime64, time_end: np.datetime64, is_historical: bool):
-    file_name_end = "historical.npy" if is_historical else "forecasted.npy"
-    dir_data_inputs = Path(__file__).resolve().parents[1] / "data" / "inputs"
+    historical_or_forecasted = "historical" if is_historical else "forecasted"
+    dir_data_inputs = Path(__file__).resolve().parents[1] / "data" / "inputs" / historical_or_forecasted
 
-    timestamp = np.load(dir_data_inputs / ("timestamp_" + file_name_end))
-    time_start_idx, time_end_idx = tuple([int(np.where(timestamp == time)[0][0]) for time in [time_start, time_end]])
-    smp = np.load(dir_data_inputs / ("smp_" + file_name_end))[time_start_idx: time_end_idx+1]
+    timestamps = np.load(dir_data_inputs / "timestamps.npy")
+    time_start_idx, time_end_idx = tuple([int(np.where(timestamps == time)[0][0]) for time in [time_start, time_end]])
+    smp = np.load(dir_data_inputs / "system_marginal_prices.npy")[time_start_idx: time_end_idx+1]
     return smp

@@ -3,10 +3,12 @@ import gurobipy as gp
 
 
 def solve(
+    date_start: int,
+    date_end: int,
     time_horizon_length: int,
     system_marginal_price: np.ndarray,
-    power_output_rated: int,
     energy_capacity_rated: int,
+    power_output_rated: int,
     state_of_health: float,
     state_of_charge_initial: float,
     state_of_charge_minimum: float,
@@ -94,15 +96,19 @@ def solve(
 
     model.optimize()
 
+    net_arbitrage_revenue, details = int(model.ObjVal), None
     if model.Status == gp.GRB.OPTIMAL:
         if return_details:
-            return model
-        return model.ObjVal
+            details = np.array(model.getAttr("X")).reshape(5, time_horizon_length) # 5 decision variables
+            details[-1] /= energy_capacity_actual # energy level -> state of charge
+        return (net_arbitrage_revenue, details)
+    
     raise ValueError(
-        "non-optimal solution\n"
-        f"time_horizon_length: {time_horizon_length}\n"
-        f"power_output_rated: {power_output_rated}\n"
+        "non-optimial solution\n"
+        f"date_start: {date_start}\n"
+        f"date_start: {date_end}\n"
         f"energy_capacity_rated: {energy_capacity_rated}\n"
+        f"power_output_rated: {power_output_rated}\n"
         f"state_of_health: {state_of_health}\n"
         f"state_of_charge_initial: {state_of_charge_initial}\n"
         f"state_of_charge_minimum: {state_of_charge_minimum}\n"
@@ -112,5 +118,4 @@ def solve(
         f"efficiency_discharge: {efficiency_discharge}\n"
         f"rest_before_charge: {rest_before_charge}\n"
         f"rest_after_discharge: {rest_after_discharge}\n"
-        f"return_details: {return_details}\n"
     )

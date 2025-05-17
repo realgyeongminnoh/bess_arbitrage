@@ -1,80 +1,38 @@
 import csv
+import numpy as np
 from pathlib import Path
-import sys
 
 
-def check_csv(configs):
-    csv_path = Path(__file__).resolve().parents[1] / "data" / "outputs" / "historical" / "net_arbitrage_revenues.csv"
-    csv_path.parent.mkdir(parents=True, exist_ok=True)
+def update_miscellaneous_csv(net_arbitrage_revenue, details, args):
 
-    if not csv_path.exists():
-        header = [
-            "net_arbitrage_revenue",
-            "day_start",
-            "day_end",
-            "power_output_rated",
-            "energy_capacity_rated",
-            "state_of_health",
-            "state_of_charge_initial",
-            "state_of_charge_minimum",
-            "state_of_charge_maximum",
-            "self_discharge_rate",
-            "efficiency_charge",
-            "efficiency_discharge",
-            "rest_before_charge",
-            "rest_after_discharge",
-            "return_details",
-        ]
-        with csv_path.open("w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(header)
-        return
-    
-    target_configs = ",".join([
-        str(configs.day_start),
-        str(configs.day_end),
-        str(configs.power_output_rated),
-        str(configs.energy_capacity_rated),
-        str(configs.state_of_health),
-        str(configs.state_of_charge_initial),
-        str(configs.state_of_charge_minimum),
-        str(configs.state_of_charge_maximum),
-        str(configs.self_discharge_rate),
-        str(configs.efficiency_charge),
-        str(configs.efficiency_discharge),
-        str(configs.rest_before_charge),
-        str(configs.rest_after_discharge),
-        str(configs.return_details),
-    ])
+    historical_or_forecasted = "historical" if args.is_historical else "forecasted"
+    path_csv = Path(__file__).resolve().parents[1] / "data" / "outputs" / historical_or_forecasted / "net_arbitrage_revenues" / "miscellaneous.csv"
 
-    with csv_path.open("r") as f:
-        next(f)
-        existing_configs = {line.strip().split(",", 1)[1] for line in f}
-    if target_configs in existing_configs:
-        sys.exit(0)
+    with path_csv.open("r") as f:
+        miscellaneous_index  = sum(1 for _ in f) - 1
 
-
-def update_csv(output, configs):
-    csv_path = Path(__file__).resolve().parents[1] / "data" / "outputs" / "historical" / "net_arbitrage_revenues.csv"
-
-    row = [
-        output,
-        configs.day_start,
-        configs.day_end,
-        configs.power_output_rated,
-        configs.energy_capacity_rated,
-        configs.state_of_health,
-        configs.state_of_charge_initial,
-        configs.state_of_charge_minimum,
-        configs.state_of_charge_maximum,
-        configs.self_discharge_rate,
-        configs.efficiency_charge,
-        configs.efficiency_discharge,
-        configs.rest_before_charge,
-        configs.rest_after_discharge,
-        configs.return_details,
+    row_miscellaneous = [
+        net_arbitrage_revenue,
+        args.energy_capacity_rated,
+        args.power_output_rated,
+        args.state_of_health,
+        args.state_of_charge_initial,
+        args.state_of_charge_minimum,
+        args.state_of_charge_maximum,
+        args.self_discharge_rate,
+        args.efficiency_charge,
+        args.efficiency_discharge,
+        args.rest_before_charge,
+        args.rest_after_discharge,
+        args.return_details,
+        miscellaneous_index,
+        args.date_start,
+        args.date_end,
     ]
-
-    with csv_path.open("a", newline="") as f:
+    
+    with path_csv.open("a", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(row)
+        writer.writerow(row_miscellaneous)
+
+    if args.return_details:
+        np.save(path_csv.parents[1] / "details_miscellaneous" / f"{miscellaneous_index}.npy", details)

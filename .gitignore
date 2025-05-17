@@ -1,3 +1,6 @@
 00_recycle_bin
 01_preliminary
 **/__pycache__
+notimelimit.sh
+notimelimit.py
+csv_organize.ipynb
