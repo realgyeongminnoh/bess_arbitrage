@@ -1,4 +1,0 @@
-net_arbitrage_revenue,energy_capacity_rated,power_output_rated,state_of_health,state_of_charge_initial,state_of_charge_minimum,state_of_charge_maximum,self_discharge_rate,efficiency_charge,efficiency_discharge,rest_before_charge,rest_after_discharge,return_details,miscellaneous_index,date_start,date_end
-96560,1000,1000,1,0,0,1,0,1,1,0,0,False,0,20220101,20220101
-96560,1000,1000,1,0,0,1,0,1,1,0,0,True,1,20220101,20220101
-96560,1000,1000,1,0,0,1,0,1,1,0,0,True,2,20220101,20220101

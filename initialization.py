@@ -25,6 +25,23 @@ def validate_args(args):
         raise ValueError(f"complete_month_start = {args.complete_month_start} <= {args.complete_month_end} = complete_month_end")
 
 
+def create_all_directories():
+    dir_inputs = Path(__file__).resolve().parents[0] / "data" / "inputs"
+    dir_outputs = Path(__file__).resolve().parents[0] / "data" / "outputs"
+
+    all_directories = [
+        dir_inputs / "historical",
+        dir_inputs / "forecasted",
+        dir_outputs / "historical" / "net_arbitrage_revenues",
+        dir_outputs / "historical" / "details_miscellaneous",
+        dir_outputs / "forecasted" / "net_arbitrage_revenues",
+        dir_outputs / "forecasted" / "details_miscellaneous",
+    ]
+
+    for directory in all_directories:
+        directory.mkdir(parents=True, exist_ok=True)
+    
+
 def save_timestamps(complete_date_start, complete_date_end, historical_or_forecasted):
     timestamps = np.arange(
         complete_date_start,
@@ -68,7 +85,6 @@ def create_csvs(complete_date_start, complete_date_end, historical_or_forecasted
     ]
 
     dir_csvs = dir_outputs / "net_arbitrage_revenues"
-    dir_csvs.mkdir(parents=True, exist_ok=True)
 
     months = [   
         str(np_yyyy_mm).replace("-", "")
@@ -98,8 +114,6 @@ def create_csvs(complete_date_start, complete_date_end, historical_or_forecasted
         "date_end",
     ]
 
-    dir_details = dir_outputs / "details_miscellaneous"
-    dir_details.mkdir(parents=True, exist_ok=True)
     path_csv = dir_csvs / "miscellaneous.csv"
 
     if not path_csv.exists():
@@ -120,6 +134,7 @@ def main():
     complete_date_start = get_datetime64(args.complete_month_start * 100 + 1)
     complete_date_end = np.datetime64(get_datetime64(args.complete_month_end * 100 + 1).astype("datetime64[M]") + 1, "h") - np.timedelta64(1, "h")
 
+    create_all_directories()
     save_timestamps(complete_date_start, complete_date_end, historical_or_forecasted)
     create_csvs(complete_date_start, complete_date_end, historical_or_forecasted)
 
