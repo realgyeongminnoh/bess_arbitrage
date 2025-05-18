@@ -1,7 +1,7 @@
-import argparse
-from pathlib import Path
 import csv
+import argparse
 import numpy as np
+from pathlib import Path
 
 from src.timeseries import get_datetime64
 
@@ -15,6 +15,8 @@ def parse_args():
 
 
 def validate_args(args):
+    if (not args.is_historical):
+        raise NotImplementedError()
     if not (200001 <= args.full_month_start):
         raise ValueError(f"200001 <= {args.full_month_start} = full_month_start")
     if not (args.full_month_end <= 300001):

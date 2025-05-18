@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+from pathlib import Path
 
 from src.timeseries import get_datetime64, get_smp
 from src.solve import solve
@@ -15,7 +16,7 @@ def parse_args():
     parser.add_argument("--power_output_rated", "--por", type=int, required=True, help="power output, rated; kW")
     parser.add_argument("--state_of_health", "--soh", type=float, required=False, default=1, help="state of health; pu; fixed")
     parser.add_argument("--state_of_charge_initial", "--socini", type=float, required=False, default=0, help="state of charge initial; pu")
-    parser.add_argument("--state_of_charge_minimum", "--scomin", type=float, required=False, default=0, help="state of charge minimum; pu")
+    parser.add_argument("--state_of_charge_minimum", "--socmin", type=float, required=False, default=0, help="state of charge minimum; pu")
     parser.add_argument("--state_of_charge_maximum", "--socmax", type=float, required=False, default=1, help="state of charge maximum; pu")
     parser.add_argument("--self_discharge_rate", "--sdr", type=float, required=False, default=0, help="self-discharge rate; pu")
     parser.add_argument("--efficiency_charge", "--ec", type=float, required=False, default=1, help="efficiency charge; pu")
@@ -27,12 +28,23 @@ def parse_args():
 
 
 def validate_args(args):
-    if not (args.date_start < args.date_end):
-        raise ValueError("date_start / date_end")
-    if (args.is_historical) and ((args.date_start < 20150101) or (args.date_end > 20250101)):
-        raise ValueError("date_start / date_end / is_historical")
+    # time-related args
     if (not args.is_historical):
         raise NotImplementedError()
+    if not (args.date_start < args.date_end):
+        raise ValueError(f"date_start = {args.date_start} < {args.date_end} = date_end")
+
+    historical_or_forecasted = "historical" if args.is_historical else "forecasted"    
+    timestamps = np.load(Path(__file__).resolve().parents[0] / "data" / "inputs" / historical_or_forecasted / "timestamps.npy")
+    full_date_start = int(str(timestamps[0])[:10].replace("-", ""))
+    full_date_end = int(str(timestamps[-1] + np.timedelta64(1, "h"))[:10].replace("-", ""))
+
+    if not (full_date_start <= args.date_start):
+        raise ValueError(f"full_date_start from initialization (timestamps) = {full_date_start} <= {args.date_start} = date_start")
+    if not (args.date_end <= full_date_end):
+        raise ValueError(f"date_end = {args.date_end} <= {full_date_end} = full_date_end from initialization (timestamps)")
+
+    # other args
     if (args.energy_capacity_rated <= 0) or (args.power_output_rated <= 0) or (args.energy_capacity_rated < args.power_output_rated):
         raise ValueError("energy_capacity_rated / power_output_rated")
     if not (0 < args.state_of_health <= 1):
