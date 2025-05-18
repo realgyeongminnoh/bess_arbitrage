@@ -3,15 +3,17 @@ import numpy as np
 from pathlib import Path
 
 from src.timeseries import get_datetime64, get_smp
-from src.solve import solve
+from src.solver import optimize
 from src.utils import update_miscellaneous_csv
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    # TIME-RELATED ARGS
     parser.add_argument("--is_historical", "--ih", action="store_true")
     parser.add_argument("--date_start", "--ds", type=int, required=True, help="yyyymmdd")
     parser.add_argument("--date_end", "--de", type=int, required=True, help="yyyymmdd; end date excluded from optimization (-1h)")
+    # OTHER FIXED ARGS
     parser.add_argument("--energy_capacity_rated", "--ecr", type=int, required=True, help="energy capacity, rated; kWh")
     parser.add_argument("--power_output_rated", "--por", type=int, required=True, help="power output, rated; kW")
     parser.add_argument("--state_of_health", "--soh", type=float, required=False, default=1, help="state of health; pu; fixed")
@@ -28,7 +30,7 @@ def parse_args():
 
 
 def validate_args(args):
-    # time-related args
+    # TIME-RELATED ARGS
     if (not args.is_historical):
         raise NotImplementedError()
     if not (args.date_start < args.date_end):
@@ -44,7 +46,7 @@ def validate_args(args):
     if not (args.date_end <= full_date_end):
         raise ValueError(f"date_end = {args.date_end} <= {full_date_end} = full_date_end from initialization (timestamps)")
 
-    # other args
+    # OTHER FIXED ARGS
     if (args.energy_capacity_rated <= 0) or (args.power_output_rated <= 0) or (args.energy_capacity_rated < args.power_output_rated):
         raise ValueError("energy_capacity_rated / power_output_rated")
     if not (0 < args.state_of_health <= 1):
@@ -76,7 +78,7 @@ def main():
     time_horizon_length = int((time_end - time_start + 1).astype(int))    
     system_marginal_price = get_smp(time_start, time_end, args.is_historical)
 
-    net_arbitrage_revenue, details = solve(
+    net_arbitrage_revenue, details = optimize(
         date_start=args.date_start,
         date_end=args.date_end,
         time_horizon_length=time_horizon_length,

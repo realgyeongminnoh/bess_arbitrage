@@ -2,7 +2,7 @@ import numpy as np
 import gurobipy as gp
 
 
-def solve(
+def optimize(
     date_start: int,
     date_end: int,
     time_horizon_length: int,
