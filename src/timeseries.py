@@ -2,10 +2,9 @@ from pathlib import Path
 import numpy as np
 
 
-def get_datetime64(yyyymmdd: int, exclude: bool):
+def get_datetime64(yyyymmdd: int):
     year, month, day = [str(yyyymmdd)[i:j] for i, j in [(0, 4), (4, 6), (6, 8)]]
     time = np.datetime64(f"{year}-{month}-{day}", "h")
-    time -= np.timedelta64(1, "h") if exclude else 0
     return time
 
 

@@ -41,13 +41,13 @@ def validate_args(args):
         
     historical_or_forecasted = "historical" if args.is_historical else "forecasted"    
     timestamps = np.load(Path(__file__).resolve().parents[0] / "data" / "inputs" / historical_or_forecasted / "timestamps.npy")
-    full_month_start = int(str(timestamps[0])[:7].replace("-", ""))
-    full_month_end_enddate_excluded = int(str(timestamps[-1])[:7].replace("-", ""))
+    complete_month_start = int(str(timestamps[0])[:7].replace("-", ""))
+    complete_month_end = int(str(timestamps[-1])[:7].replace("-", ""))
 
-    if not (full_month_start <= args.month):
-        raise ValueError(f"full_month_start from initialization (timestamps) = {full_month_start} <= {args.month} = month")
-    if not (args.month <= full_month_end_enddate_excluded):
-        raise ValueError(f"month = {args.month} <= {full_month_end_enddate_excluded} = full_month_end (enddate excluded) from initialization (timestamps)")
+    if not (complete_month_start <= args.month):
+        raise ValueError(f"complete_month_start from initialization (timestamps) = {complete_month_start} <= {args.month} = month")
+    if not (args.month <= complete_month_end):
+        raise ValueError(f"month = {args.month} <= {complete_month_end} = full_month_end (enddate excluded) from initialization (timestamps)")
     
     # OTHER RANGED ARGS
     if not (0 < args.energy_capacity_rated_start * args.energy_capacity_rated_increment * args.energy_capacity_rated_end):
@@ -88,8 +88,8 @@ def job_per_processor(idx_config):
     energy_capacity_rated, power_output_rated = pairs_per_config[idx_config]
 
     net_arbitrage_revenue, _ = optimize(
-        date_start=date_start,
-        date_end=date_end,
+        date_start=date_start_string,
+        date_end=date_end_string,
         time_horizon_length=time_horizon_length,
         system_marginal_price=system_marginal_price,
         energy_capacity_rated=energy_capacity_rated,
@@ -114,13 +114,13 @@ def main():
     validate_args(args)
 
     # TIME-RELATED ARGS
-    global date_start, date_end, time_horizon_length, system_marginal_price
-    time_start = get_datetime64(args.month * 100 + 1, False)
+    global date_start_string, date_end_string, time_horizon_length, system_marginal_price
+    time_start = get_datetime64(args.month * 100 + 1)
     time_end = np.datetime64(time_start.astype("datetime64[M]") + 1, "h") - np.timedelta64(1, "h")
-    date_start = str(time_start.astype("datetime64[D]")).replace("-", "")
-    date_end = str(np.datetime64(time_end.astype("datetime64[D]") + 1, "h").astype("datetime64[D]")).replace("-", "")
     time_horizon_length = int((time_end - time_start + 1).astype(int))    
     system_marginal_price = get_smp(time_start, time_end, args.is_historical)
+    date_start_string = str(time_start.astype("datetime64[D]")).replace("-", "")
+    date_end_string = str(np.datetime64(time_end.astype("datetime64[D]") + 1, "h").astype("datetime64[D]")).replace("-", "")
 
     # OTHER RANGED ARGS
     global pairs_per_config

@@ -11,8 +11,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     # TIME-RELATED ARGS
     parser.add_argument("--is_historical", "--ih", action="store_true")
-    parser.add_argument("--date_start", "--ds", type=int, required=True, help="yyyymmdd")
-    parser.add_argument("--date_end", "--de", type=int, required=True, help="yyyymmdd; end date excluded from optimization (-1h)")
+    parser.add_argument("--date_start", "--ds", type=int, required=True, help="yyyymmdd; ex) 2022.01.01 -> \"--ds 20220101\"")
+    parser.add_argument("--date_end", "--de", type=int, required=True, help="yyyymmdd; ex) 2022.01.31 -> \"--ds 20220131\"") 
     # OTHER FIXED ARGS
     parser.add_argument("--energy_capacity_rated", "--ecr", type=int, required=True, help="energy capacity, rated; kWh")
     parser.add_argument("--power_output_rated", "--por", type=int, required=True, help="power output, rated; kW")
@@ -33,18 +33,18 @@ def validate_args(args):
     # TIME-RELATED ARGS
     if (not args.is_historical):
         raise NotImplementedError()
-    if not (args.date_start < args.date_end):
-        raise ValueError(f"date_start = {args.date_start} < {args.date_end} = date_end")
+    if not (args.date_start <= args.date_end):
+        raise ValueError(f"date_start = {args.date_start} <= {args.date_end} = date_end")
 
     historical_or_forecasted = "historical" if args.is_historical else "forecasted"    
     timestamps = np.load(Path(__file__).resolve().parents[0] / "data" / "inputs" / historical_or_forecasted / "timestamps.npy")
-    full_date_start = int(str(timestamps[0])[:10].replace("-", ""))
-    full_date_end = int(str(timestamps[-1] + np.timedelta64(1, "h"))[:10].replace("-", ""))
+    complete_date_start = int(str(timestamps[0])[:10].replace("-", ""))
+    complete_date_end = int(str(timestamps[-1])[:10].replace("-", ""))
 
-    if not (full_date_start <= args.date_start):
-        raise ValueError(f"full_date_start from initialization (timestamps) = {full_date_start} <= {args.date_start} = date_start")
-    if not (args.date_end <= full_date_end):
-        raise ValueError(f"date_end = {args.date_end} <= {full_date_end} = full_date_end from initialization (timestamps)")
+    if not (complete_date_start <= args.date_start):
+        raise ValueError(f"complete_date_start from initialization (timestamps) = {complete_date_start} <= {args.date_start} = date_start")
+    if not (args.date_end <= complete_date_end):
+        raise ValueError(f"date_end = {args.date_end} <= {complete_date_end} = complete_date_end from initialization (timestamps)")
 
     # OTHER FIXED ARGS
     if (args.energy_capacity_rated <= 0) or (args.power_output_rated <= 0) or (args.energy_capacity_rated < args.power_output_rated):
@@ -73,8 +73,9 @@ def main():
     args = parse_args()
     validate_args(args)
 
-    time_start = get_datetime64(args.date_start, False)
-    time_end = get_datetime64(args.date_end, True)
+    time_start = get_datetime64(args.date_start)
+    time_end = np.datetime64(get_datetime64(args.date_end).astype("datetime64[D]") + 1, "h") - np.timedelta64(1, "h") # T23
+
     time_horizon_length = int((time_end - time_start + 1).astype(int))    
     system_marginal_price = get_smp(time_start, time_end, args.is_historical)
 
