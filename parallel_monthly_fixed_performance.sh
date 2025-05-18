@@ -1,4 +1,18 @@
 #!/bin/bash
+
+# HISTORICAL / FORECASTED
+IS_HISTORICAL_FLAG=true
+
+if [ "$IS_HISTORICAL_FLAG" = true ]; then
+    HISTORICAL_CLI_FLAG="--ih"
+else
+    HISTORICAL_CLI_FLAG=""
+fi
+
+# complete month range for system_marginal_prices you provided in data / inputs
+python -u initialization.py $HISTORICAL_CLI_FLAG --cms 201501 --cme 202412
+
+
 # ============================== FIXED PERFORMANCE PARAMETERS
 # ============================== HISTORY
 
@@ -9,8 +23,7 @@
 
 # ============================== MODEL PARAMETERS
 
-# HISTORICAL / FORECASTED
-IS_HISTORICAL_FLAG=true
+
 
 # BATCH MONTH START & END
 MONTH_START=201501
@@ -40,11 +53,6 @@ REST_AFTER_DISCHARGE=0
 
 # ============================== DO NOT MAKE CHANGE
 
-if [ "$IS_HISTORICAL_FLAG" = true ]; then
-    HISTORICAL_CLI_FLAG="--ih"
-else
-    HISTORICAL_CLI_FLAG=""
-fi
 
 CURRENT_YEAR=${MONTH_START:0:4}
 CURRENT_MONTH=${MONTH_START:4:2}

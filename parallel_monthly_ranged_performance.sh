@@ -1,4 +1,18 @@
 #!/bin/bash
+
+# HISTORICAL / FORECASTED
+IS_HISTORICAL_FLAG=true
+
+if [ "$IS_HISTORICAL_FLAG" = true ]; then
+    HISTORICAL_CLI_FLAG="--ih"
+else
+    HISTORICAL_CLI_FLAG=""
+fi
+
+# complete month range for system_marginal_prices you provided in data / inputs
+python -u initialization.py $HISTORICAL_CLI_FLAG --cms 201501 --cme 202412
+
+
 # ============================== FIXED PERFORMANCE PARAMETERS
 # ============================== HISTORY
 
