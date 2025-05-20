@@ -16,8 +16,8 @@ python -u initialization.py $HISTORICAL_CLI_FLAG --cms 201501 --cme 202412
 # ============================== FIXED PERFORMANCE PARAMETERS
 # ============================== HISTORY
 
-# all historical months / default ECR POR / 1 0 0 1 0 1 1 0 0 (default)
-# all historical months / default ECR POR / SOH(1) SOCINI(0) SOCMINMAX(0 0.2 0.01) SDR(1) ECEDD(0.9 1 0.1) RBCRAD(0 4 1)
+# 202201 ~ 202212 / 10000 10000 100000 both kwh kw / soh(1) socini(0) socmin(0 0.2 0.02) socmax(1-socmin) sdr(0) ec(0.9 1 0.01) ed(ec) rbc(0 4 1) rad(rac)
+# 
 #
 
 

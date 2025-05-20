@@ -95,27 +95,27 @@ def optimize(
     )
 
     model.optimize()
-
-    net_arbitrage_revenue, details = int(model.ObjVal), None
+    net_arbitrage_revenue, details = np.nan, None
     if model.Status == gp.GRB.OPTIMAL:
+        net_arbitrage_revenue = int(model.ObjVal)
         if return_details:
             details = np.array(model.getAttr("X")).reshape(5, time_horizon_length) # 5 decision variables
             details[-1] /= energy_capacity_actual # energy level -> state of charge
-        return (net_arbitrage_revenue, details)
+    return (net_arbitrage_revenue, details)
     
-    raise ValueError(
-        "non-optimial solution\n"
-        f"date_start: {date_start}\n"
-        f"date_start: {date_end}\n"
-        f"energy_capacity_rated: {energy_capacity_rated}\n"
-        f"power_output_rated: {power_output_rated}\n"
-        f"state_of_health: {state_of_health}\n"
-        f"state_of_charge_initial: {state_of_charge_initial}\n"
-        f"state_of_charge_minimum: {state_of_charge_minimum}\n"
-        f"state_of_charge_maximum: {state_of_charge_maximum}\n"
-        f"self_discharge_rate: {self_discharge_rate}\n"
-        f"efficiency_charge: {efficiency_charge}\n"
-        f"efficiency_discharge: {efficiency_discharge}\n"
-        f"rest_before_charge: {rest_before_charge}\n"
-        f"rest_after_discharge: {rest_after_discharge}\n"
-    )
+    # raise ValueError(
+    #     "non-optimial solution\n"
+    #     f"date_start: {date_start}\n"
+    #     f"date_start: {date_end}\n"
+    #     f"energy_capacity_rated: {energy_capacity_rated}\n"
+    #     f"power_output_rated: {power_output_rated}\n"
+    #     f"state_of_health: {state_of_health}\n"
+    #     f"state_of_charge_initial: {state_of_charge_initial}\n"
+    #     f"state_of_charge_minimum: {state_of_charge_minimum}\n"
+    #     f"state_of_charge_maximum: {state_of_charge_maximum}\n"
+    #     f"self_discharge_rate: {self_discharge_rate}\n"
+    #     f"efficiency_charge: {efficiency_charge}\n"
+    #     f"efficiency_discharge: {efficiency_discharge}\n"
+    #     f"rest_before_charge: {rest_before_charge}\n"
+    #     f"rest_after_discharge: {rest_after_discharge}\n"
+    # )
