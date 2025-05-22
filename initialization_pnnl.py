@@ -92,11 +92,6 @@ class Pnnl:
 
         file_name = f"{self.technology}_{self.year}_{self.estimate}.csv"
 
-        # np.savetxt(
-        #     path_csv / file_name, self.configs, delimiter=",", comments="",
-        #     header="energy_capacity_rated,power_output_rated,state_of_charge_minimum,state_of_charge_maximum,efficiency,rest,opex_yearly,capex",
-        # )
-
         header = [
             "energy_capacity_rated",
             "power_output_rated",
@@ -147,7 +142,6 @@ def main():
                     estimate=estimate,
                     fxrate=1333,
                 )
-
                 count += 1
 
     print(f"{count} csvs about BESS configs based on PNNL dataset are saved")

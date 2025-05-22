@@ -1,5 +1,6 @@
 from pathlib import Path
 import numpy as np
+import pandas as pd
 
 
 def get_datetime64(yyyymmdd: int):
@@ -16,3 +17,16 @@ def get_smp(time_start: np.datetime64, time_end: np.datetime64, is_historical: b
     time_start_idx, time_end_idx = tuple([int(np.where(timestamps == time)[0][0]) for time in [time_start, time_end]])
     smp = np.load(dir_data_inputs / "system_marginal_prices.npy")[time_start_idx: time_end_idx+1]
     return smp
+
+
+def get_demands(time_start: np.datetime64, time_end: np.datetime64, is_historical: bool):
+    historical_or_forecasted = "historical" if is_historical else "forecasted"
+    dir_data_inputs = Path(__file__).resolve().parents[1] / "data" / "inputs" / historical_or_forecasted
+
+    timestamps = np.load(dir_data_inputs / "timestamps.npy")
+    time_start_idx, time_end_idx = tuple([int(np.where(timestamps == time)[0][0]) for time in [time_start, time_end]])
+
+    demands =  pd.read_csv(Path.cwd() / "data" / "inputs" / "historical" / "demands.csv").to_numpy()[:, 1:].reshape(-1)
+    demands = demands[time_start_idx: time_end_idx+1]
+    
+    return demands
