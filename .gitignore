@@ -1,5 +1,6 @@
 00_recycle_bin
 01_preliminary
+02_preliminary
 **/__pycache__
 notimelimit.sh
 notimelimit.py
