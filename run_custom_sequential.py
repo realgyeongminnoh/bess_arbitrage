@@ -22,8 +22,8 @@ def parse_args():
     # time-related
     parser.add_argument("--date_start_int", "--dsi", type=int, required=True)
     parser.add_argument("--date_end_int", "--dei", type=int, required=True)
-    parser.add_argument("--time_horizon_idx_smp", "--thn_smp", type=int, required=True)
-    parser.add_argument("--time_horizon_idx_smp_ref", "--thn_smp_ref", type=int, default=0)
+    parser.add_argument("--time_horizon_idx_smp", "--thi_smp", type=int, required=True)
+    parser.add_argument("--time_horizon_idx_smp_ref", "--thi_smp_ref", type=int, default=0)
     # solver bool flags
     parser.add_argument("--use_smp_ref", "--usr", action="store_true")
     parser.add_argument("--return_detail", "--rd", action="store_true")

@@ -1,6 +1,11 @@
 import csv
 import numpy as np
+import gurobipy as gp
 from pathlib import Path
+
+
+def suppress_gurobi_parallel_spam():
+    (_ := gp.Model()).setParam("OutputFlag", 0)
 
 
 def convert_date_int_to_datetime64(date_int: int, is_date_end: bool):
