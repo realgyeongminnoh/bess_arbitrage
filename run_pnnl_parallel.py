@@ -118,9 +118,9 @@ def main():
             "Vanadium_Redox_Flow_2023_Neutral.csv",
         ]
 
-    path_inputs_pnnl_folder = Path.cwd() / "data" / "inputs" / "pnnl"
+    path_inputs_pnnl_folder = Path(__file__).resolve().parents[0] / "data" / "inputs" / "pnnl"
     path_outputs_pnnl_folder = (
-        Path.cwd() / "data" / "outputs" / "pnnl" / 
+        Path(__file__).resolve().parents[0] / "data" / "outputs" / "pnnl" / 
         f"time_horizon_{args.time_horizon_idx_smp}_ref_{args.time_horizon_idx_smp_ref if use_smp_ref else args.time_horizon_idx_smp}"
     )
     path_outputs_pnnl_folder.mkdir(parents=True, exist_ok=True)
