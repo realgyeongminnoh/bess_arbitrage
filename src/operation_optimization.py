@@ -7,8 +7,8 @@ from .output import Output
 
 def optimize(
     parameter: Parameter,
-    smp: np.ndarray,
-    smp_ref: np.ndarray,
+    smp_opt: np.ndarray,
+    smp_rev: np.ndarray,
     return_detail: bool, 
 ):
     ecr = parameter.ecr                 # energy capacity rated
@@ -28,7 +28,7 @@ def optimize(
     el_max = eca * soc_max              # energy level maximum
     one_minus_sdr = 1 - sdr             # one minus self discharge rate
     one_over_ed = 1 / ed                # one over efficiency discharge
-    num_periods = len(smp)              # number of periods in the given time horizon
+    num_periods = len(smp_opt)              # number of periods in the given time horizon
 
     #
     model = gp.Model()
@@ -109,40 +109,40 @@ def optimize(
         )
 
     #
-    discharging_revenue = gp.quicksum(
-        smp[t] * pod[t]
+    bess_revenue_generation = gp.quicksum(
+        smp_opt[t] * pod[t]
         for t in range(num_periods)
     )
 
     #
-    charging_cost = gp.quicksum(
-        smp[t] * poc[t]
+    plant_revenue_reduction = gp.quicksum(
+        smp_opt[t] * poc[t]
         for t in range(num_periods)
     )
-
-    # 
-    arbitrage_profit = discharging_revenue - charging_cost
     
     #
-    model.setObjective(arbitrage_profit, gp.GRB.MAXIMIZE)
+    combined_revenue_net = bess_revenue_generation - plant_revenue_reduction
+
+    #
+    model.setObjective(combined_revenue_net, gp.GRB.MAXIMIZE)
 
     #
     model.optimize()
 
     #
     if model.Status != gp.GRB.OPTIMAL:
-        raise ValueError(model.Status)
+        raise ValueError(f"Solver status is not optimal: {model.Status}")
 
     #
     output = Output(num_periods, return_detail)
-    output.discharging_revenue = int(discharging_revenue.getValue())
-    output.charging_cost = int(charging_cost.getValue())
+    output.bess_revenue_generation = int(bess_revenue_generation.getValue())
+    output.plant_revenue_reduction = int(plant_revenue_reduction.getValue())
+    output.combined_revenue_net = int(combined_revenue_net.getValue())
 
-    if smp_ref is not None:
-        output.discharging_revenue = int((smp_ref * np.array(model.getAttr("X", pod).select())).sum())
-        output.charging_cost = int((smp_ref * np.array(model.getAttr("X", poc).select())).sum())
-
-    output.arbitrage_profit = output.discharging_revenue - output.charging_cost
+    if smp_rev is not None:
+        output.bess_revenue_generation = int((smp_rev * np.array(model.getAttr("X", pod).select())).sum())
+        output.plant_revenue_reduction = int((smp_rev * np.array(model.getAttr("X", poc).select())).sum())
+        output.combined_revenue_net = output.bess_revenue_generation - output.plant_revenue_reduction
 
     if return_detail:
         output.detail = np.array(model.getAttr("X")).reshape(5, num_periods)

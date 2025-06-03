@@ -1,4 +1,4 @@
-time_start,time_end,custom_idx,return_detail,use_smp_ref,time_horizon_idx_smp,time_horizon_idx_smp_ref,discharging_revenue,charging_cost,arbitrage_profit,ecr,por,soh,soc_ini,soc_min,soc_max,sdr,ec,ed,rbc,rad
-2024-06-01T00,2024-06-07T23,0,True,False,0,0,2835074,2342018,493056,4000,1000,1.0,0.1,0.1,0.9,0.0,0.9,0.9,4,4
-2024-06-01T00,2024-06-07T23,1,True,False,0,0,1359249,1091162,268087,4000,1000,1.0,0.1,0.1,0.9,0.0,0.85,0.85,4,4
-2024-06-01T00,2024-06-07T23,2,True,False,0,0,3100726,2323546,777180,4000,1000,1.0,0.1,0.1,0.9,0.0,0.95,0.95,4,4
+custom_idx,return_detail,time_start,time_end,dataset_idx_opt,dataset_idx_rev,bess_revenue_generation,plant_revenue_reduction,combined_revenue_netecr,por,soh,soc_ini,soc_min,soc_max,sdr,ec,ed,rbc,rad
+0,True,2024-06-01T00,2024-06-07T23,0,0,1359249,1091162,268087,4000,1000,1.0,0.1,0.1,0.9,0.0,0.85,0.85,4,4
+1,True,2024-06-01T00,2024-06-07T23,0,0,2835074,2342018,493056,4000,1000,1.0,0.1,0.1,0.9,0.0,0.9,0.9,4,4
+2,True,2024-06-01T00,2024-06-07T23,0,0,3100726,2323546,777180,4000,1000,1.0,0.1,0.1,0.9,0.0,0.95,0.95,4,4

@@ -15,11 +15,11 @@ def convert_date_int_to_datetime64(date_int: int, is_date_end: bool):
     return time
 
 
-def get_smp(time_horizon_idx: int, time_start: np.datetime64, time_end: np.datetime64):
-    path_time_horizon_folder = Path(__file__).resolve().parents[1] / "data" / "inputs" / f"time_horizon_{time_horizon_idx}"
-    timestamp_full = np.load(path_time_horizon_folder / "timestamp.npy")
+def get_smp(dataset_idx: int, time_start: np.datetime64, time_end: np.datetime64):
+    path_dataset_folder = Path(__file__).resolve().parents[1] / "data" / "inputs" / f"dataset_{dataset_idx}"
+    timestamp_full = np.load(path_dataset_folder / "timestamp.npy")
     idx_start, idx_end = int(np.where(timestamp_full == time_start)[0][0]), int(np.where(timestamp_full == time_end)[0][0])
-    return np.load(path_time_horizon_folder / "smp.npy")[idx_start:idx_end + 1]
+    return np.load(path_dataset_folder / "smp.npy")[idx_start:idx_end + 1]
 
 
 def save_custom_output(time_start, time_end, args, output):
@@ -32,16 +32,15 @@ def save_custom_output(time_start, time_end, args, output):
     if not path_csv_file.exists():
 
         header = [
-            "time_start",
-            "time_end",
             "custom_idx",
             "return_detail",
-            "use_smp_ref",
-            "time_horizon_idx_smp",
-            "time_horizon_idx_smp_ref",
-            "discharging_revenue",
-            "charging_cost",
-            "arbitrage_profit",
+            "time_start",
+            "time_end",
+            "dataset_idx_opt",
+            "dataset_idx_rev",
+            "bess_revenue_generation",
+            "plant_revenue_reduction",
+            "combined_revenue_net"
             "ecr",
             "por",
             "soh",
@@ -63,16 +62,15 @@ def save_custom_output(time_start, time_end, args, output):
         custom_idx = sum(1 for _ in f) - 1
 
     row = [
-        time_start,
-        time_end,
         custom_idx,
         args.return_detail,
-        args.use_smp_ref,
-        args.time_horizon_idx_smp,
-        args.time_horizon_idx_smp_ref if args.use_smp_ref else args.time_horizon_idx_smp,
-        output.discharging_revenue,
-        output.charging_cost,
-        output.arbitrage_profit,
+        time_start,
+        time_end,
+        args.dataset_idx_opt,
+        args.dataset_idx_rev,
+        output.bess_revenue_generation,
+        output.plant_revenue_reduction,
+        output.combined_revenue_net,
         args.ecr,
         args.por,
         args.soh,
